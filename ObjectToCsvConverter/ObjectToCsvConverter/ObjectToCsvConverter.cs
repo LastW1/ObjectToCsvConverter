@@ -1,12 +1,8 @@
 ﻿using ObjectToCsvConverter.Managers;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ObjectToCsvConverter
 {
@@ -30,33 +26,41 @@ namespace ObjectToCsvConverter
 
             var stringBuilder = new StringBuilder();
 
-            var isEnumerable = objectType.GetInterface(nameof(IEnumerable)) != null;
-
-            if (isEnumerable)
+            if (ReflectionManager.IsTypeIEnumerable(objectType))
             {
-                var collectionObject = (IEnumerable)ObjectToConvert;
-
-                FieldInfo[] fields = null;
-
-                foreach (var singleObject in collectionObject)
-                {
-                    if (fields == null)
-                    {
-                        var singleType = singleObject.GetType();
-                        fields = singleType.GetFields();
-                    }
-
-                    WritePropertiesToString(stringBuilder, fields, singleObject);
-                    stringBuilder.Append(CollectionItemsSeparator);
-                }
+                ConvertFromCollection(stringBuilder);
             }
             else
             {
-                var fields = objectType.GetFields();
-                WritePropertiesToString(stringBuilder, fields, ObjectToConvert);
+                ConvertFromSingleInstance(stringBuilder);
             }
 
             return stringBuilder.ToString();
+        }
+
+        private void ConvertFromCollection(StringBuilder stringBuilder)
+        {
+            var collectionObject = (IEnumerable)ObjectToConvert;
+
+            FieldInfo[] fields = null;
+
+            foreach (var singleObject in collectionObject)
+            {
+                if (fields == null)
+                {
+                    var singleType = singleObject.GetType();
+                    fields = singleType.GetFields();
+                }
+
+                WritePropertiesToString(stringBuilder, fields, singleObject);
+                stringBuilder.Append(CollectionItemsSeparator);
+            }
+        }
+
+        private void ConvertFromSingleInstance(StringBuilder stringBuilder)
+        {
+            var fields = objectType.GetFields();
+            WritePropertiesToString(stringBuilder, fields, ObjectToConvert);
         }
 
         private void WritePropertiesToString(StringBuilder stringBuilder, FieldInfo[] fields, object objectToParse)
@@ -66,8 +70,7 @@ namespace ObjectToCsvConverter
             for (var i = 0; i < fieldsCount; i++)
             {
                 var fieldValue = fields[i].GetValue(objectToParse);
-
-                if(fieldValue == null)
+                if (IsNullValueOverridedWithString && fieldValue == null)
                 {
                     stringBuilder.Append(NullOverridingValue);
                 }
@@ -75,16 +78,14 @@ namespace ObjectToCsvConverter
                 {
                     var valueType = fieldValue.GetType();
 
-                    if (valueType.GetInterface(nameof(IEnumerable)) != null)
+                    if (ReflectionManager.IsTypeIEnumerable(valueType))
                     {
-                        stringBuilder.Append($"\t{string.Join(NestedCollectionSeparetor, UnknownEnumerableToStringEnumerable((IEnumerable)fieldValue))}");
+                        stringBuilder.Append($"\t{string.Join(NestedCollectionSeparetor, TypesManager.UnknownEnumerableToStringEnumerable((IEnumerable)fieldValue))}");
                     }
                     else
                     {
-                        stringBuilder.Append($"\t{fieldValue}"); // tab prevents from automatic parsing values like dates
+                        stringBuilder.Append($"\t{fieldValue}");
                     }
-                    //  stringBuilder.Append($@"""{fields[i].GetValue(objectToParse)}""");
-                    //   stringBuilder.Append($"\"=\"\"{fields[i].GetValue(objectToParse)}\"\"\"");
                 }
 
                 if (i != fieldsCount - 1)
@@ -96,7 +97,7 @@ namespace ObjectToCsvConverter
 
         public void ConvertToCsv(string fileName, string filePath = null)
         {
-            var stringData  = ConvertToString();
+            var stringData = ConvertToString();
 
             fileName = FileNameManager.CheckAndGenerateProperFileName(fileName);
 
@@ -104,18 +105,6 @@ namespace ObjectToCsvConverter
             {
                 writetext.Write(stringData);
             }
-        }
-
-        private IEnumerable<string> UnknownEnumerableToStringEnumerable(IEnumerable enumerable)
-        {
-            var resultList = new List<string>();
-
-            foreach(var singleValue in enumerable)
-            {
-                resultList.Add(singleValue.ToString());
-            }
-
-            return resultList;
         }
     }
 }
