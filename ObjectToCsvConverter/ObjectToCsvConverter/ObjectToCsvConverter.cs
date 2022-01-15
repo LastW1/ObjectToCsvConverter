@@ -1,7 +1,9 @@
 ﻿using ObjectToCsvConverter.Managers;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,6 +14,7 @@ namespace ObjectToCsvConverter
     {
         public object ObjectToConvert { get; set; }
         public string ColumnSeparator { get; set; } = ";";
+        public string NestedCollectionSeparetor { get; set; } = ",";
         public string CollectionItemsSeparator { get; set; } = "\r\n";
         public bool IsNullValueOverridedWithString = false;
         public string NullOverridingValue = "NULL";
@@ -70,9 +73,18 @@ namespace ObjectToCsvConverter
                 }
                 else
                 {
+                    var valueType = fieldValue.GetType();
+
+                    if (valueType.GetInterface(nameof(IEnumerable)) != null)
+                    {
+                        stringBuilder.Append($"\t{string.Join(NestedCollectionSeparetor, UnknownEnumerableToStringEnumerable((IEnumerable)fieldValue))}");
+                    }
+                    else
+                    {
+                        stringBuilder.Append($"\t{fieldValue}"); // tab prevents from automatic parsing values like dates
+                    }
                     //  stringBuilder.Append($@"""{fields[i].GetValue(objectToParse)}""");
                     //   stringBuilder.Append($"\"=\"\"{fields[i].GetValue(objectToParse)}\"\"\"");
-                    stringBuilder.Append($"\t{fields[i].GetValue(objectToParse)}"); // tab prevents from automatic parsing values like dates
                 }
 
                 if (i != fieldsCount - 1)
@@ -94,9 +106,16 @@ namespace ObjectToCsvConverter
             }
         }
 
-        private void ParseObjectToString()
+        private IEnumerable<string> UnknownEnumerableToStringEnumerable(IEnumerable enumerable)
         {
+            var resultList = new List<string>();
 
+            foreach(var singleValue in enumerable)
+            {
+                resultList.Add(singleValue.ToString());
+            }
+
+            return resultList;
         }
     }
 }
