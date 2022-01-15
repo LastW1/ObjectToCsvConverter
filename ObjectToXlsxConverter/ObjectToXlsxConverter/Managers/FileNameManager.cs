@@ -12,7 +12,7 @@ namespace ObjectToXlsxConverter.Managers
             var fileExtentionRegex = new Regex(@"\.[a-zA-Z]+$");
             if (fileExtentionRegex.IsMatch(fileName))
             {
-                if (!fileName.ToLower().EndsWith(".xlsx"))
+                if (!fileName.ToLower().EndsWith(".csv"))
                 {
                     throw new Exception("Incorrect file name extention passed!"); //zrobić custom exception
                 }
@@ -20,7 +20,7 @@ namespace ObjectToXlsxConverter.Managers
             }
             else
             {
-                fileName += ".xlsx";
+                fileName += ".csv";
             }
 
             return fileName;
