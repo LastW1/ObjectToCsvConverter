@@ -13,6 +13,8 @@ namespace ObjectToCsvConverter
         public object ObjectToConvert { get; set; }
         public string ColumnSeparator { get; set; } = ";";
         public string CollectionItemsSeparator { get; set; } = "\r\n";
+        public bool IsNullValueOverridedWithString = false;
+        public string NullOverridingValue = "NULL";
 
         public ObjectToCsvConverter(object objectToConvert)
         {
@@ -25,61 +27,68 @@ namespace ObjectToCsvConverter
 
             var stringBuilder = new StringBuilder();
 
-            var isCollection = objectType.GetInterface(nameof(ICollection)) != null;
+            var isEnumerable = objectType.GetInterface(nameof(IEnumerable)) != null;
 
-            if (isCollection)
+            if (isEnumerable)
             {
-                var collectionObject = (ICollection)ObjectToConvert;
+                var collectionObject = (IEnumerable)ObjectToConvert;
 
-                PropertyInfo[] properties = null;
+                FieldInfo[] fields = null;
 
                 foreach (var singleObject in collectionObject)
                 {
-                    if (properties == null)
+                    if (fields == null)
                     {
                         var singleType = singleObject.GetType();
-                        properties = singleType.GetProperties();
+                        fields = singleType.GetFields();
                     }
 
-                    WritePropertiesToString(stringBuilder, properties, singleObject);
+                    WritePropertiesToString(stringBuilder, fields, singleObject);
                     stringBuilder.Append(CollectionItemsSeparator);
                 }
             }
             else
             {
-                var properties = objectType.GetProperties();
-                WritePropertiesToString(stringBuilder, properties, ObjectToConvert);
+                var fields = objectType.GetFields();
+                WritePropertiesToString(stringBuilder, fields, ObjectToConvert);
             }
 
             return stringBuilder.ToString();
         }
 
-        private void WritePropertiesToString(StringBuilder stringBuilder, PropertyInfo[] properties, object objectToParse)
+        private void WritePropertiesToString(StringBuilder stringBuilder, FieldInfo[] fields, object objectToParse)
         {
-            var propertiesCount = properties.Length;
+            var fieldsCount = fields.Length;
 
-            for (var i = 0; i < propertiesCount; i++)
+            for (var i = 0; i < fieldsCount; i++)
             {
-                stringBuilder.Append($@"""{properties[i].GetValue(objectToParse)}""");
+                var fieldValue = fields[i].GetValue(objectToParse);
 
-                if (i != propertiesCount - 1)
+                if(fieldValue == null)
+                {
+                    stringBuilder.Append(NullOverridingValue);
+                }
+                else
+                {
+                    //  stringBuilder.Append($@"""{fields[i].GetValue(objectToParse)}""");
+                    //   stringBuilder.Append($"\"=\"\"{fields[i].GetValue(objectToParse)}\"\"\"");
+                    stringBuilder.Append($"\t{fields[i].GetValue(objectToParse)}"); // tab prevents from automatic parsing values like dates
+                }
+
+                if (i != fieldsCount - 1)
                 {
                     stringBuilder.Append(ColumnSeparator);
                 }
             }
         }
 
-        public byte[] ConvertToUtf8Byte()
-        {
-            return new byte[] { };
-        }
-
-        public void ConvertToXlsx(string fileName, string filePath = null)
+        public void ConvertToCsv(string fileName, string filePath = null)
         {
             var stringData  = ConvertToString();
+
             fileName = FileNameManager.CheckAndGenerateProperFileName(fileName);
 
-            using (StreamWriter writetext = new StreamWriter(fileName))
+            using (StreamWriter writetext = new StreamWriter(filePath == null ? fileName : $"{filePath}\\{fileName}"))
             {
                 writetext.Write(stringData);
             }

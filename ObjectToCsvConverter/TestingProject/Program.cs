@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TestingProject
 {
@@ -7,54 +8,68 @@ namespace TestingProject
     {
         static void Main(string[] args)
         {
-            /*  var simpleDto = new SimpleDto
-              {
-                  Field1 = "Field1",
-                  Field2 = "Field2",
-                  Field3 = "Field3"
-              };
+            ObjectToCsvConverter.ObjectToCsvConverter converter = new ObjectToCsvConverter.ObjectToCsvConverter(new object());
 
-              ObjectToCsvConverter.ObjectToCsvConverter converter = new ObjectToCsvConverter.ObjectToCsvConverter(simpleDto);
+            //SimpleStringFieldsDtoTest(converter);
+            //SimpleStringFieldsDtoInCollectionTest(converter);
+            SimpleMixedValuesDtoTest(converter);
 
-              var lol = converter.ConvertToString();
+            Console.WriteLine("Hello World!");
+        }
 
-              var simpleDto2 = new List<SimpleDto>
-              {
-                   new SimpleDto
-                   {
-                      Field1 = "Field1",
-                      Field2 = "Field2",
-                      Field3 = "Field3"
-                   }
-              };
+        private static void SimpleStringFieldsDtoTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
+        {
+            var simpleDto = new SimpleStringFieldsDto
+            {
+                Field1 = "Field1",
+                Field2 = "Field2",
+                Field3 = "Field3"
+            };
 
-              converter.ObjectToConvert = simpleDto2;
+            converter.ObjectToConvert = simpleDto;
 
-              lol = converter.ConvertToString();*/
+            converter.ConvertToCsv(nameof(SimpleStringFieldsDtoTest));
+        }
 
-              var simpleDto2 = new List<SimpleDto>
+        private static void SimpleStringFieldsDtoInCollectionTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
+        {
+            var simpleDtoList = new List<SimpleStringFieldsDto>
                 {
-                     new SimpleDto
+                     new SimpleStringFieldsDto
                      {
                         Field1 = "Field1",
                         Field2 = "Field2",
                         Field3 = "Field3"
                      },
-                      new SimpleDto
+                      new SimpleStringFieldsDto
                      {
                         Field1 = "Field4",
                         Field2 = "Field5",
                         Field3 = "Field6"
                      }
-                };     
+                };
 
-            ObjectToCsvConverter.ObjectToCsvConverter converter = new ObjectToCsvConverter.ObjectToCsvConverter(simpleDto2);
+            converter.ObjectToConvert = simpleDtoList;
+            converter.ConvertToCsv(nameof(SimpleStringFieldsDtoInCollectionTest)+"AsList");
 
-            converter.ObjectToConvert = simpleDto2;
+            var simpleDtoIList = (IList<SimpleStringFieldsDto>)simpleDtoList.AsEnumerable();
+            converter.ObjectToConvert = simpleDtoIList;
+            converter.ConvertToCsv(nameof(SimpleStringFieldsDtoInCollectionTest) + "AsIList");
 
-            converter.ConvertToXlsx("test");
+            var simpleDtoEnumerable = simpleDtoList.AsEnumerable();
+            converter.ObjectToConvert = simpleDtoEnumerable;
+            converter.ConvertToCsv(nameof(SimpleStringFieldsDtoInCollectionTest) + "AsEnumerable");
 
-            Console.WriteLine("Hello World!");
+            var simpleDtoQueryable = simpleDtoList.AsQueryable();
+            converter.ObjectToConvert = simpleDtoQueryable;
+            converter.ConvertToCsv(nameof(SimpleStringFieldsDtoInCollectionTest) + "AsQueryable");
+        }
+
+        private static void SimpleMixedValuesDtoTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
+        {
+            converter.ObjectToConvert = new SimpleMixedValuesDto();
+            converter.IsNullValueOverridedWithString = true;
+            converter.ConvertToCsv(nameof(SimpleMixedValuesDtoTest));
         }
     }
 }
