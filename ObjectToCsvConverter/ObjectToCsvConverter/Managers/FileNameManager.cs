@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace ObjectToXlsxConverter.Managers
+namespace ObjectToCsvConverter.Managers
 {
     public static class FileNameManager // to jest bardziej helper niż manager
     {

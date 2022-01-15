@@ -1,4 +1,4 @@
-﻿using ObjectToXlsxConverter.Managers;
+﻿using ObjectToCsvConverter.Managers;
 using System;
 using System.Collections;
 using System.IO;
@@ -6,15 +6,15 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ObjectToXlsxConverter
+namespace ObjectToCsvConverter
 {
-    public class ObjectToXlsxConverter
+    public class ObjectToCsvConverter
     {
         public object ObjectToConvert { get; set; }
         public string ColumnSeparator { get; set; } = ";";
         public string CollectionItemsSeparator { get; set; } = "\r\n";
 
-        public ObjectToXlsxConverter(object objectToConvert)
+        public ObjectToCsvConverter(object objectToConvert)
         {
             ObjectToConvert = objectToConvert;
         }

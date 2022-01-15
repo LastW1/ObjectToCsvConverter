@@ -14,7 +14,7 @@ namespace TestingProject
                   Field3 = "Field3"
               };
 
-              ObjectToXlsxConverter.ObjectToXlsxConverter converter = new ObjectToXlsxConverter.ObjectToXlsxConverter(simpleDto);
+              ObjectToCsvConverter.ObjectToCsvConverter converter = new ObjectToCsvConverter.ObjectToCsvConverter(simpleDto);
 
               var lol = converter.ConvertToString();
 
@@ -48,7 +48,7 @@ namespace TestingProject
                      }
                 };     
 
-            ObjectToXlsxConverter.ObjectToXlsxConverter converter = new ObjectToXlsxConverter.ObjectToXlsxConverter(simpleDto2);
+            ObjectToCsvConverter.ObjectToCsvConverter converter = new ObjectToCsvConverter.ObjectToCsvConverter(simpleDto2);
 
             converter.ObjectToConvert = simpleDto2;
 
