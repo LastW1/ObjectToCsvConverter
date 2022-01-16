@@ -13,7 +13,10 @@ namespace TestingProject
             //SimpleStringFieldsDtoTest(converter);
             //SimpleStringFieldsDtoInCollectionTest(converter);
             // SimpleMixedValuesDtoTest(converter);
-            NestedValuesDtoTest(converter);
+            //NestedValuesDtoTest(converter);
+            AttributesDtoTest(converter);
+            //InvalidAttributeDtoTest(converter);
+
             Console.WriteLine("Hello World!");
         }
 
@@ -71,10 +74,24 @@ namespace TestingProject
             converter.IsNullValueOverridedWithString = true;
             converter.ConvertToCsv(nameof(SimpleMixedValuesDtoTest));
         }
+
         private static void NestedValuesDtoTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
         {
             converter.ObjectToConvert = new NestedValuesDto();
             converter.ConvertToCsv(nameof(NestedValuesDtoTest));
+        }
+
+        private static void AttributesDtoTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
+        {
+            converter.ObjectToConvert = new AttributesDto();
+            converter.ConvertToCsv(nameof(AttributesDtoTest));
+        }
+
+        private static void InvalidAttributeDtoTest(ObjectToCsvConverter.ObjectToCsvConverter converter)
+        {
+            // should throw
+            converter.ObjectToConvert = new InvalidAttributeDto();
+            converter.ConvertToCsv(nameof(InvalidAttributeDtoTest));
         }
     }
 }

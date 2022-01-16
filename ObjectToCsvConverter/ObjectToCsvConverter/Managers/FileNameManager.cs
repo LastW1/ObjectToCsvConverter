@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace ObjectToCsvConverter.Managers
 {
-    public static class FileNameManager // to jest bardziej helper niż manager
+    internal static class FileNameManager // to jest bardziej helper niż manager
     {
         public static string CheckAndGenerateProperFileName(string fileName)
         {

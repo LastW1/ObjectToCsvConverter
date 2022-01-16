@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace ObjectToCsvConverter.Managers
 {
-    public static class ReflectionManager
+    internal static class ReflectionManager
     {
         public static bool IsTypeIEnumerable(Type type)
         {

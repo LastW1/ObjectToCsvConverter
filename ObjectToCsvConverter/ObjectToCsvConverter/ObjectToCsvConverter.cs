@@ -1,4 +1,6 @@
-﻿using ObjectToCsvConverter.Managers;
+﻿using ObjectToCsvConverter.Attributes;
+using ObjectToCsvConverter.Managers;
+using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
@@ -59,17 +61,21 @@ namespace ObjectToCsvConverter
 
         private void ConvertFromSingleInstance(StringBuilder stringBuilder)
         {
+            var objectType = ObjectToConvert.GetType();
             var fields = objectType.GetFields();
             WritePropertiesToString(stringBuilder, fields, ObjectToConvert);
         }
 
         private void WritePropertiesToString(StringBuilder stringBuilder, FieldInfo[] fields, object objectToParse)
         {
+            AttributeValidatorManager.ValidateFields(fields);
+
             var fieldsCount = fields.Length;
 
             for (var i = 0; i < fieldsCount; i++)
             {
                 var fieldValue = fields[i].GetValue(objectToParse);
+                var fieldAttribute = fields[i].GetCustomAttribute(typeof(CsvConverterDateAttribute));
                 if (IsNullValueOverridedWithString && fieldValue == null)
                 {
                     stringBuilder.Append(NullOverridingValue);
@@ -84,7 +90,8 @@ namespace ObjectToCsvConverter
                     }
                     else
                     {
-                        stringBuilder.Append($"\t{fieldValue}");
+                        FitToAttributes(stringBuilder, fieldValue, fieldAttribute);
+                       // stringBuilder.Append($"\t{fieldValue}");
                     }
                 }
 
@@ -92,6 +99,20 @@ namespace ObjectToCsvConverter
                 {
                     stringBuilder.Append(ColumnSeparator);
                 }
+            }
+        }
+
+        private void FitToAttributes(StringBuilder stringBuilder, object fieldValue, Attribute attribute)
+        {
+            if (attribute == null || fieldValue == null)
+            {
+                stringBuilder.Append($"\t{fieldValue}");
+            }
+            else
+            {
+                // stringBuilder.Append($"{(DateTime)fieldValue:yyyy-MM-dd HH:mm:ss}");
+                stringBuilder.Append($"{(DateTime)fieldValue:yyyy-MM-dd HH:mm:ss}");
+               // stringBuilder.Append($"{(DateTime)fieldValue}");
             }
         }
 

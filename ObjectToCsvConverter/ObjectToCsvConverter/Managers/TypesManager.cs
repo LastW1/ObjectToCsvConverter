@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ObjectToCsvConverter.Managers
 {
-    public static class TypesManager
+    internal static class TypesManager
     {
         public static IEnumerable<string> UnknownEnumerableToStringEnumerable(IEnumerable enumerable)
         {
